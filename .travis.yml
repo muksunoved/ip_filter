@@ -2,9 +2,6 @@ language: cpp
 compiler: clang
 dist: xenial
 
-install:
-    - sudo apt-get install libgtest-dev
-
 script:
 - cmake .
 - cmake --build .
