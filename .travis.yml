@@ -3,7 +3,7 @@ compiler: clang
 dist: trusty
 addons :
   apt :
-     packages :
+     sources :
          - ubuntu-toolchain-r-test
 script:
 - cmake .
