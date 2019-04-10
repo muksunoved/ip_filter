@@ -4,7 +4,7 @@ dist: xenial
 addons :
   apt :
      packages :
-         - libboost-test-dev
+         - ubuntu-toolchain-r-test
 script:
 - cmake .
 - cmake --build .
