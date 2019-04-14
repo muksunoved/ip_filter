@@ -46,6 +46,7 @@ Filter::Filter() {
 Filter::Filter(const FilterPolicy& policy, const IpT& filter) : Filter()  {
 	policy_ = policy;
 	filter_ = filter;
+
 }
 
 bool Filter::filter(const std::tuple<int,int,int,int>& ip_in)  {
@@ -58,6 +59,10 @@ bool Filter::filter(const std::tuple<int,int,int,int>& ip_in)  {
 
 Sorter::Sorter(const std::vector<Filter>& filters)
 	: filters_(filters)  {
+	vs_after_filtering_[FilterPolicy::kNothing].reserve(2048);
+	vs_after_filtering_[FilterPolicy::kFirstOf].reserve(2048);
+	vs_after_filtering_[FilterPolicy::kTwoFirstDigits].reserve(2048);
+	vs_after_filtering_[FilterPolicy::kAnyOf].reserve(2048);
 }
 
 void Sorter::SortIps()  {
