@@ -9,6 +9,7 @@
 #include <map>
 #include <unordered_map>
 #include <functional>
+#include <memory>
 
 namespace sorter {
 
@@ -24,24 +25,59 @@ enum class FilterPolicy {
 	kAnyOf,
 };
 
+//! Represent of base data filter
+/**
+ *
+ */
+class FilterBase {
+public :
+    FilterBase(const FilterPolicy& pol) { policy_=pol; }
+    virtual ~FilterBase() = default;
+
+    virtual bool filter(const IpT& ip_in) = 0;
+    FilterPolicy get_policy() const { return policy_; }
+
+protected:
+    FilterPolicy policy_{FilterPolicy::kNothing};
+
+protected:
+    static std::map<FilterPolicy, std::function<bool(const FilterBase& f, const IpT&)>> declared_filters_;
+public:
+    std::vector<int> args_base_;
+};
+
 //! Represent of one iteration data filter
 /**
  *
  */
-class Filter {
+class Filter : public FilterBase {
 public:
-	Filter();
-	Filter(const FilterPolicy& policy, const IpT& filter);
-	~Filter() = default;
+    using FilterBase::FilterBase;
 
-	bool filter(const IpT& ip_in) ;
+    Filter() = delete;
+    ~Filter() = default;
 
-	FilterPolicy get_policy() const { return policy_; }
-	const IpT& get_filter_value() const { return filter_; }
-private:
-	FilterPolicy policy_{FilterPolicy::kNothing};
-	IpT filter_{0,0,0,0};
-	static std::map<FilterPolicy, std::function<bool(const Filter& f, const IpT&)>> declared_filters_;
+    template<typename T>
+    void push_back_to_args(const T& arg)  {
+        args_base_.push_back(arg);
+    }
+    template<typename T, typename... Args>
+    void push_back_to_args(const T&  arg, Args... args)  {
+        args_base_.push_back(arg);
+        push_back_to_args(args...);
+    }
+    template<typename... Args>
+    Filter(const FilterPolicy& pol, Args... args) : FilterBase(pol) {
+        policy_ = pol;
+        push_back_to_args(args...);
+    }
+    bool filter(const IpT& ip_in) {
+        auto f_it = declared_filters_.find(policy_);
+	    if (f_it != declared_filters_.end())  {
+	        return f_it->second(*this, ip_in);
+	    }
+	    return false;
+	};
 };
 
 //! Represent input data, filter, sort and output for stream
@@ -67,8 +103,5 @@ protected:
 	std::map<FilterPolicy, IpTuples> vs_after_filtering_;
 
 };
-
-
-
 
 }

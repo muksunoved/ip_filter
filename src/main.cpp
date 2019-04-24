@@ -5,14 +5,15 @@ using namespace sorter;
 
 int main()
 {
-    const std::vector<Filter> kFilter{
-    	Filter{FilterPolicy::kNothing, 		  IpT{0,0,0,0}},
-		Filter{FilterPolicy::kFirstOf, 		  IpT{1,0,0,0}},
-    	Filter{FilterPolicy::kTwoFirstDigits, IpT{46,70,0,0}},
-		Filter{FilterPolicy::kAnyOf,          IpT{46,46,46,46}}
+    const auto kFilters = std::vector<Filter>{
+    	{Filter{FilterPolicy::kNothing               }},
+		{Filter{FilterPolicy::kFirstOf,        1     }},
+    	{Filter{FilterPolicy::kTwoFirstDigits, 46, 70}},
+		{Filter{FilterPolicy::kAnyOf,          46    }}
     } ;
+
     try {
-		Sorter s{kFilter};
+        Sorter s(kFilters);
 
 		std::cin >> s;
 		s.SortIps();

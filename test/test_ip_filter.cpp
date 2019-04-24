@@ -6,13 +6,13 @@ using namespace sorter;
 using namespace ::testing;
 using namespace std;
 
-static const std::vector<Filter> kFilterDefault{Filter{FilterPolicy::kNothing, std::tuple<int,int,int,int>{0,0,0,0}}} ;
+static const std::vector<Filter> kFilterDefault{Filter{FilterPolicy::kNothing}} ;
 
 class MockSorter : public Sorter {
 public:
 
 
-	MockSorter(const std::vector<Filter>& filters = kFilterDefault ) : Sorter{filters}  {}
+	MockSorter(const std::vector<Filter>& filters  = kFilterDefault ) : Sorter{filters}  {}
 	~MockSorter() = default;
 	const IpTuples& get_v() const { return v_base_;}
 
@@ -92,9 +92,9 @@ TEST_F(SorterTest, ShouldThrowExceptIfAbracadabraInput)  {
 }
 
 TEST_F(SorterTest, ShouldCollectForFilterkFirstOf)  {
-	const std::vector<Filter> kFilter{Filter{FilterPolicy::kFirstOf, IpT{1,0,0,0}}} ;
+	const auto kFilter = std::vector<Filter>{Filter{FilterPolicy::kFirstOf, 1}} ;
 
-	MockSorter s(kFilter);
+	MockSorter s({kFilter});
 
 	std::stringstream is("01.002.003.4\t sss \t ddd \n02.03.005.255\t sdsdsd \t fgfgfg \n1.5.53.004.01\t ererre \t fgfg \n");
 	is >> s;
@@ -115,28 +115,28 @@ TEST_F(SorterTest, ShouldCollectForFilterkFirstOf)  {
 }
 
 TEST_F(SorterTest, ShouldCollectForFilterkTwoFirstDigits)  {
-	const std::vector<Filter> kFilter{Filter{FilterPolicy::kTwoFirstDigits, IpT{46,70,0,0}}} ;
+	const auto kFilter = std::vector<Filter>{Filter{FilterPolicy::kTwoFirstDigits, 46,50}} ;
 
-	MockSorter s(kFilter);
+	MockSorter s{kFilter};
 
-	std::stringstream is("46.70.003.4\t sss \t ddd \n02.03.005.255\t sdsdsd \t fgfgfg \n46.70.53.004.01\t ererre \t fgfg \n");
+	std::stringstream is("46.50.003.4\t sss \t ddd \n02.03.005.255\t sdsdsd \t fgfgfg \n46.50.53.004.01\t ererre \t fgfg \n");
 	is >> s;
 
 	EXPECT_EQ(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits].size(), 2);
 
 	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 46);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 70);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 50);
 	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 3);
 	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 4);
 
 	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 46);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 70);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 50);
 	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 53);
 	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 4);
 }
 
 TEST_F(SorterTest, ShouldCollectForFilterkAnyOfDigits)  {
-	const std::vector<Filter> kFilter{Filter{FilterPolicy::kAnyOf, IpT{46,70,0,0}}} ;
+	const auto kFilter = std::vector<Filter>{Filter{FilterPolicy::kAnyOf, 46}} ;
 
 	MockSorter s(kFilter);
 

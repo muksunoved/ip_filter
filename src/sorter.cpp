@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <numeric>
 #include <future>
+#include <cassert>
 
 #include <sorter.h>
 
@@ -9,16 +10,21 @@ namespace sorter {
 
 using namespace std;
 
-std::map<FilterPolicy, std::function<bool(const Filter& f, const IpT&)>>  Filter::declared_filters_ = {
-		{FilterPolicy::kNothing, [](const Filter& f, const IpT& in)->bool {return true;} },
-		{FilterPolicy::kFirstOf, [](const Filter& f, const IpT& in)->bool {
-			if (get<0>(f.get_filter_value()) == get<0>(in)) {
+std::map<FilterPolicy, std::function<bool(const FilterBase& f, const IpT&)>>  FilterBase::declared_filters_ = {
+		{FilterPolicy::kNothing, [](const FilterBase& f, const IpT& in)->bool {return true;} },
+		{FilterPolicy::kFirstOf, [](const FilterBase& f, const IpT& in)->bool {
+		    assert(f.args_base_.size() > 0);
+
+			if (f.args_base_[0] == get<0>(in)) {
 				return true;
 			}
 			return false;
 		} },
-		{FilterPolicy::kTwoFirstDigits, [](const Filter& f, const IpT& in)->bool {
-			auto& [f_ip1, f_ip2, f_ip3, f_ip4 ] = f.get_filter_value();
+		{FilterPolicy::kTwoFirstDigits, [](const FilterBase& f, const IpT& in)->bool {
+		    assert(f.args_base_.size() > 1);
+
+			auto& f_ip1 = f.args_base_[0];
+			auto& f_ip2 = f.args_base_[1];
 			auto& [in_ip1, in_ip2, in_ip3, in_ip4 ] = in;
 
 			if (f_ip1 == in_ip1 && f_ip2 == in_ip2) {
@@ -26,8 +32,10 @@ std::map<FilterPolicy, std::function<bool(const Filter& f, const IpT&)>>  Filter
 			}
 			return false;
 		} },
-		{FilterPolicy::kAnyOf, [](const Filter& f, const IpT& in)->bool {
-			auto& [f_ip1, f_ip2, f_ip3, f_ip4 ] = f.get_filter_value();
+		{FilterPolicy::kAnyOf, [](const FilterBase& f, const IpT& in)->bool {
+		    assert(f.args_base_.size() > 0);
+
+			auto& f_ip1 = f.args_base_[0];
 			auto& [in_ip1, in_ip2, in_ip3, in_ip4 ] = in;
 
 			if (f_ip1 == in_ip1
@@ -40,25 +48,9 @@ std::map<FilterPolicy, std::function<bool(const Filter& f, const IpT&)>>  Filter
 		} }
 };
 
-Filter::Filter() {
-}
-
-Filter::Filter(const FilterPolicy& policy, const IpT& filter) : Filter()  {
-	policy_ = policy;
-	filter_ = filter;
-
-}
-
-bool Filter::filter(const std::tuple<int,int,int,int>& ip_in)  {
-	auto f_it = declared_filters_.find(policy_);
-	if (f_it != declared_filters_.end())  {
-		return f_it->second(*this, ip_in);
-	}
-	return false;
-}
-
 Sorter::Sorter(const std::vector<Filter>& filters)
 	: filters_(filters)  {
+    v_base_.reserve(2048);
 	vs_after_filtering_[FilterPolicy::kNothing].reserve(2048);
 	vs_after_filtering_[FilterPolicy::kFirstOf].reserve(2048);
 	vs_after_filtering_[FilterPolicy::kTwoFirstDigits].reserve(2048);
