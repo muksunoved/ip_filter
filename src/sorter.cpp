@@ -15,22 +15,15 @@ std::map<FilterPolicy, std::function<bool(const FilterBase& f, const IpT&)>>  Fi
 		{FilterPolicy::kFirstOf, [](const FilterBase& f, const IpT& in)->bool {
 		    assert(f.args_base_.size() > 0);
 
-			if (f.args_base_[0] == get<0>(in)) {
-				return true;
-			}
-			return false;
-		} },
-		{FilterPolicy::kTwoFirstDigits, [](const FilterBase& f, const IpT& in)->bool {
-		    assert(f.args_base_.size() > 1);
+		    auto& [in_ip1, in_ip2, in_ip3, in_ip4 ] = in;
+		    auto inv = std::vector<int>{in_ip1, in_ip2, in_ip3, in_ip4 };
+		    bool result = true;
 
-			auto& f_ip1 = f.args_base_[0];
-			auto& f_ip2 = f.args_base_[1];
-			auto& [in_ip1, in_ip2, in_ip3, in_ip4 ] = in;
+		    for (int i=0; i<inv.size() && i<f.args_base_.size(); i++)  {
+		        result = result && (inv[i] == f.args_base_[i]);
+		    }
+		    return result;
 
-			if (f_ip1 == in_ip1 && f_ip2 == in_ip2) {
-				return true;
-			}
-			return false;
 		} },
 		{FilterPolicy::kAnyOf, [](const FilterBase& f, const IpT& in)->bool {
 		    assert(f.args_base_.size() > 0);
@@ -50,11 +43,6 @@ std::map<FilterPolicy, std::function<bool(const FilterBase& f, const IpT&)>>  Fi
 
 Sorter::Sorter(const std::vector<Filter>& filters)
 	: filters_(filters)  {
-    v_base_.reserve(2048);
-	vs_after_filtering_[FilterPolicy::kNothing].reserve(2048);
-	vs_after_filtering_[FilterPolicy::kFirstOf].reserve(2048);
-	vs_after_filtering_[FilterPolicy::kTwoFirstDigits].reserve(2048);
-	vs_after_filtering_[FilterPolicy::kAnyOf].reserve(2048);
 }
 
 void Sorter::SortIps()  {
@@ -77,19 +65,31 @@ std::istream& Sorter::operator>>(std::istream& is )  {
 	try {
 		is >> ws;
 		auto& [ip1, ip2, ip3, ip4] = ip;
+		int order;
+
 		for(std::string line; std::getline(is, line, '\n');)  {
 			auto result = std::sscanf(line.c_str(), "%03d.%03d.%03d.%03d\n", &ip1, &ip2, &ip3, &ip4);
 			if (result != 4)  {
 				throw (std::runtime_error("Fail parse string"));
 			}
 			v_base_.push_back(ip);
-			for (auto f : filters_)  {
-				if (f.filter(ip))  {
-					vs_after_filtering_[f.get_policy()].push_back(ip);
-				}
-			}
 			is >> ws;
 		}
+		order = 0;
+		for (auto& f : filters_)  {
+		    vs_after_filtering_[order].reserve(v_base_.size());
+		    order++;
+		}
+		for (auto &ip : v_base_)  {
+		    order = 0;
+		    for (auto f : filters_)  {
+		        if (f.filter(ip))  {
+		            vs_after_filtering_[order].push_back(ip);
+		        }
+		    order++;
+		    }
+		}
+
 	} catch (std::runtime_error& e)  {
 		std::cout << "Fail parse IP table : " << std::string(e.what()) << endl;
 		throw(e);

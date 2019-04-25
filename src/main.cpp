@@ -8,7 +8,7 @@ int main()
     const auto kFilters = std::vector<Filter>{
     	{Filter{FilterPolicy::kNothing               }},
 		{Filter{FilterPolicy::kFirstOf,        1     }},
-    	{Filter{FilterPolicy::kTwoFirstDigits, 46, 70}},
+    	{Filter{FilterPolicy::kFirstOf,        46, 70}},
 		{Filter{FilterPolicy::kAnyOf,          46    }}
     } ;
 

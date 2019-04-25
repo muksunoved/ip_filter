@@ -16,7 +16,7 @@ public:
 	~MockSorter() = default;
 	const IpTuples& get_v() const { return v_base_;}
 
-	std::map<FilterPolicy, IpTuples>& get_v_filtering()  {
+	std::map<int, IpTuples>& get_v_filtering()  {
 		return vs_after_filtering_;
 	}
 
@@ -99,40 +99,39 @@ TEST_F(SorterTest, ShouldCollectForFilterkFirstOf)  {
 	std::stringstream is("01.002.003.4\t sss \t ddd \n02.03.005.255\t sdsdsd \t fgfgfg \n1.5.53.004.01\t ererre \t fgfg \n");
 	is >> s;
 
-	EXPECT_EQ(s.get_v_filtering()[FilterPolicy::kNothing].size(), 0);
-	EXPECT_EQ(s.get_v_filtering()[FilterPolicy::kFirstOf].size(), 2);
+	EXPECT_EQ(s.get_v_filtering()[0].size(), 2);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kFirstOf][0]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kFirstOf][0]), 2);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kFirstOf][0]), 3);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kFirstOf][0]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][0]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][0]), 2);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][0]), 3);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][0]), 4);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kFirstOf][1]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kFirstOf][1]), 5);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kFirstOf][1]), 53);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kFirstOf][1]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][1]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][1]), 5);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][1]), 53);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][1]), 4);
 
 }
 
 TEST_F(SorterTest, ShouldCollectForFilterkTwoFirstDigits)  {
-	const auto kFilter = std::vector<Filter>{Filter{FilterPolicy::kTwoFirstDigits, 46,50}} ;
+	const auto kFilter = std::vector<Filter>{Filter{FilterPolicy::kFirstOf, 46,50}} ;
 
 	MockSorter s{kFilter};
 
 	std::stringstream is("46.50.003.4\t sss \t ddd \n02.03.005.255\t sdsdsd \t fgfgfg \n46.50.53.004.01\t ererre \t fgfg \n");
 	is >> s;
 
-	EXPECT_EQ(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits].size(), 2);
+	EXPECT_EQ(s.get_v_filtering()[0].size(), 2);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 46);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 50);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 3);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][0]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][0]), 46);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][0]), 50);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][0]), 3);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][0]), 4);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 46);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 50);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 53);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kTwoFirstDigits][1]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][1]), 46);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][1]), 50);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][1]), 53);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][1]), 4);
 }
 
 TEST_F(SorterTest, ShouldCollectForFilterkAnyOfDigits)  {
@@ -143,17 +142,17 @@ TEST_F(SorterTest, ShouldCollectForFilterkAnyOfDigits)  {
 	std::stringstream is("46.70.003.4\t sss \t ddd \n02.03.005.255\t sdsdsd \t fgfgfg \n10.70.46.004.01\t ererre \t fgfg \n");
 	is >> s;
 
-	EXPECT_EQ(s.get_v_filtering()[FilterPolicy::kAnyOf].size(), 2);
+	EXPECT_EQ(s.get_v_filtering()[0].size(), 2);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kAnyOf][0]), 46);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kAnyOf][0]), 70);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kAnyOf][0]), 3);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kAnyOf][0]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][0]), 46);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][0]), 70);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][0]), 3);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][0]), 4);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kAnyOf][1]), 10);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kAnyOf][1]), 70);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kAnyOf][1]), 46);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kAnyOf][1]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][1]), 10);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][1]), 70);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][1]), 46);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][1]), 4);
 }
 
 TEST_F(SorterTest, ShouldSecondInputIpGreaterThanFirst1)  {
@@ -164,15 +163,15 @@ TEST_F(SorterTest, ShouldSecondInputIpGreaterThanFirst1)  {
 
 	s.SortIps();
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 30);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 5);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 255);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][0]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][0]), 30);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][0]), 5);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][0]), 255);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 20);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 3);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 4);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][1]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][1]), 20);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][1]), 3);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][1]), 4);
 }
 
 TEST_F(SorterTest, ShouldSecondInputIpGreaterThanFirst2)  {
@@ -183,15 +182,15 @@ TEST_F(SorterTest, ShouldSecondInputIpGreaterThanFirst2)  {
 
 	s.SortIps();
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 30);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 5);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 101);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][0]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][0]), 30);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][0]), 5);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][0]), 101);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 30);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 5);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 100);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][1]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][1]), 30);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][1]), 5);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][1]), 100);
 }
 
 TEST_F(SorterTest, ShouldSecondInputIpGreaterThanFirstAndNiceOutput)  {
@@ -202,15 +201,15 @@ TEST_F(SorterTest, ShouldSecondInputIpGreaterThanFirstAndNiceOutput)  {
 
 	s.SortIps();
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 30);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 5);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kNothing][0]), 101);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][0]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][0]), 30);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][0]), 5);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][0]), 101);
 
-	EXPECT_EQ(get<0>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 1);
-	EXPECT_EQ(get<1>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 30);
-	EXPECT_EQ(get<2>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 5);
-	EXPECT_EQ(get<3>(s.get_v_filtering()[FilterPolicy::kNothing][1]), 100);
+	EXPECT_EQ(get<0>(s.get_v_filtering()[0][1]), 1);
+	EXPECT_EQ(get<1>(s.get_v_filtering()[0][1]), 30);
+	EXPECT_EQ(get<2>(s.get_v_filtering()[0][1]), 5);
+	EXPECT_EQ(get<3>(s.get_v_filtering()[0][1]), 100);
 
 	std::stringstream os;
 	os << s;

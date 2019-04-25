@@ -19,10 +19,9 @@ using IpT = std::tuple<int,int,int,int>;
 
 //! Simple filters logical policy
 enum class FilterPolicy {
-	kNothing,
-	kFirstOf,
-	kTwoFirstDigits,
-	kAnyOf,
+	kNothing,   //! Add all policy
+	kFirstOf,   //! Add only if first parameters digits match to first value digits
+	kAnyOf,     //! Add if parameter digit match for any of value digit
 };
 
 //! Represent of base data filter
@@ -100,7 +99,7 @@ public:
 protected:
 	const std::vector<Filter>& filters_;
 	IpTuples v_base_;
-	std::map<FilterPolicy, IpTuples> vs_after_filtering_;
+	std::map<int, IpTuples> vs_after_filtering_;
 
 };
 
